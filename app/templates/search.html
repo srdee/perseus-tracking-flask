@@ -1,4 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
       <h1>Search for tracking file:</h1>
+      <form action="" method="post">
+      	{{ form.hidden_tag() }}
+      	<p>
+      		Enter a CTS URN to view tracking data: <br>
+      		{{ form.urn(size=50) }}<br/>
+      		{% for error in form.urn.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}<br>
+      	</p>
+      	<p><input type="submit" value="Search"></p>
+      </form>
 {% endblock %}

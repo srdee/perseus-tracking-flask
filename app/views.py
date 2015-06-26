@@ -1,10 +1,16 @@
-from flask import render_template
+from flask import render_template, flash, redirect
 from app import app
+from .forms import SearchForm
 
 @app.route("/")
-@app.route("/search")
+@app.route("/search", methods =["GET", "POST"])
 def search():
-	return render_template('search.html',
+    form = SearchForm()
+    if form.validate_on_submit():
+        flash("Retrieving data for %s" % form.urn.data)
+        return redirect("/display")
+    return render_template('search.html',
+        form = form,
 		title='Search')
 
 @app.route("/browse")
