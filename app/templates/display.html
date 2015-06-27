@@ -1,10 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-  	{% if f.urn %}
-		<h1>Tracking information for {{ f.urn }}:</h1>
-    {% else %}
-    	<h1>Tracking information for {{ f.id }}:</h1>
-    {% endif %}
+		<h1>Tracking information for {{ urn }}:</h1>
     {% for key in f %}
     <div> <p>{{ key }} : {{ f[key] }}</p></div>
     {% endfor %}

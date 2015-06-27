@@ -1,6 +1,7 @@
-from flask import render_template, flash, redirect
+from flask import render_template, flash, redirect, session, url_for, request, g, jsonify
 from app import app
 from .forms import SearchForm
+import json
 
 @app.route("/")
 @app.route("/search", methods =["GET", "POST"])
@@ -8,7 +9,13 @@ def search():
     form = SearchForm()
     if form.validate_on_submit():
         flash("Retrieving data for %s" % form.urn.data)
-        return redirect("/display")
+        with open("../canonical-greekLit/canonical-greekLit.tracking.json","r") as f:
+            TrackingData = json.loads(f.read())
+        tracking_data = TrackingData[form.urn.data]
+        return render_template("display.html", 
+            title="Tracking information for " + form.urn.data,
+            urn = form.urn.data,
+            f = tracking_data)
     return render_template('search.html',
         form = form,
 		title='Search')
@@ -18,25 +25,26 @@ def browse():
 	return render_template('browse.html',
 		title='Browse')
 
-@app.route("/display")
+@app.route("/display/<urn>")
+def display(urn):
+    with open("../canonical-greekLit/canonical-greekLit.tracking.json","r") as f:
+          TrackingData = json.loads(f.read())
+    tracking_data = TrackingData[urn]
+    if tracking_data == None:
+        flash('Tracking data for %s not found.' % urn)
+        return redirect(url_for('search'))
+    return render_template('display.html', 
+        title = "Tracking information for " + urn,
+        urn = urn, 
+        f = tracking_data)
 
-def display():
-	f =  {
-        "epidoc_compliant": False, 
-        "fully_unicode": True, 
-        "git_repo": "canonical-greekLit", 
-        "has_cts_metadata": False, 
-        "has_cts_refsDecl": False, 
-        "id": "1999.01.0227", 
-        "last_editor": "", 
-        "note": "", 
-        "src": "texts/sdl/Apollonius/argo_gk.xml", 
-        "status": "migrated", 
-        "target": "canonical-greekLit/data/tlg0001/tlg001/tlg0001.tlg001.perseus-grc1.xml", 
-        "valid_xml": True,
-        "urn": "urn:cts:greekLit:tlg0001.tlg001.perseus-grc1"
-    }
-	
-	return render_template('display.html', 
-		title = "Testing", 
-		f = f)
+@app.route("/api/<urn>.json")
+def api(urn):
+    with open("../canonical-greekLit/canonical-greekLit.tracking.json","r") as f:
+          TrackingData = json.loads(f.read())
+    tracking_data = TrackingData[urn]
+    if tracking_data == None:
+        flash('Tracking data for %s not found.' % urn)
+        return redirect(url_for('search'))
+    return render_template('api.html', 
+       json =  "{'"+ urn + "':" + json.dumps(TrackingData[urn], sort_keys=True, indent=4) + "}")
