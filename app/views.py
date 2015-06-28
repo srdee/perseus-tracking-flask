@@ -2,6 +2,8 @@ from flask import render_template, flash, redirect, session, url_for, request, g
 from app import app
 from .forms import SearchForm
 import json
+import tracking
+import logging
 
 @app.route("/")
 @app.route("/search", methods =["GET", "POST"])
@@ -9,7 +11,7 @@ def search():
     form = SearchForm()
     if form.validate_on_submit():
         flash("Retrieving data for %s" % form.urn.data)
-        with open("../canonical-greekLit/canonical-greekLit.tracking.json","r") as f:
+        with app.open_resource("static/canonical-greekLit.tracking.json","r") as f:
             TrackingData = json.loads(f.read())
         tracking_data = TrackingData[form.urn.data]
         return render_template("display.html", 
@@ -27,7 +29,7 @@ def browse():
 
 @app.route("/display/<urn>")
 def display(urn):
-    with open("../canonical-greekLit/canonical-greekLit.tracking.json","r") as f:
+    with app.open_resource("static/canonical-greekLit.tracking.json","r") as f:
           TrackingData = json.loads(f.read())
     tracking_data = TrackingData[urn]
     if tracking_data == None:
@@ -40,7 +42,7 @@ def display(urn):
 
 @app.route("/api/<urn>.json")
 def api(urn):
-    with open("../canonical-greekLit/canonical-greekLit.tracking.json","r") as f:
+    with app.open_resource("static/canonical-greekLit.tracking.json", "r") as f:
           TrackingData = json.loads(f.read())
     tracking_data = TrackingData[urn]
     if tracking_data == None:
